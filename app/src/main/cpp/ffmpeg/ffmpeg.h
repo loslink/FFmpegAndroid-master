@@ -497,7 +497,7 @@ typedef struct OutputFile {
     int shortest;
 } OutputFile;
 
-extern InputStream **input_streams;
+extern InputStream **input_streams; //extern表示引用外部变量
 extern int        nb_input_streams;
 extern InputFile   **input_files;
 extern int        nb_input_files;

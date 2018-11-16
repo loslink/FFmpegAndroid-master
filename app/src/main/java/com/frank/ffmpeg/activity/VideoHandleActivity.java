@@ -25,8 +25,8 @@ public class VideoHandleActivity extends AppCompatActivity implements View.OnCli
     private static final int MSG_FINISH = 102;
 
     private static final String PATH = Environment.getExternalStorageDirectory().getPath();
-    private static final String srcFile = PATH + File.separator + "hello.mp4";
-    private static final String appendVideo = PATH + File.separator + "test.mp4";
+    private static final String srcFile = PATH + File.separator + "t2.mp4";
+    private static final String appendVideo = PATH + File.separator + "t.mp4";
     private ProgressBar progress_video;
 
     @SuppressLint("HandlerLeak")
@@ -178,9 +178,9 @@ public class VideoHandleActivity extends AppCompatActivity implements View.OnCli
                 if (!FileUtil.checkFileExist(srcFile)){
                     return;
                 }
-                String cutVideo = PATH + File.separator + "cutVideo.mp4";
+                String cutVideo = PATH + File.separator + "out.mp4";
                 int startTime = 0;
-                int duration = 20;
+                int duration = 5;
                 commandLine = FFmpegUtil.cutVideo(srcFile, startTime, duration, cutVideo);
                 break;
             case 2://视频合并
@@ -215,8 +215,8 @@ public class VideoHandleActivity extends AppCompatActivity implements View.OnCli
                     return;
                 }
                 //1、图片
-                String photo = PATH + File.separator + "launcher.png";
-                String photoMark = PATH + File.separator + "photoMark.mp4";
+                String photo = PATH + File.separator + "logo.png";
+                String photoMark = PATH + File.separator + "out.mp4";
                 commandLine = FFmpegUtil.addWaterMark(appendVideo, photo, photoMark);
                 //2、文字
 //                String text = "Hello,FFmpeg";
@@ -231,7 +231,7 @@ public class VideoHandleActivity extends AppCompatActivity implements View.OnCli
                     return;
                 }
                 String Video2Gif = PATH + File.separator + "Video2Gif.gif";
-                int gifStart = 30;
+                int gifStart = 0;
                 int gifDuration = 5;
                 commandLine = FFmpegUtil.generateGif(srcFile, gifStart, gifDuration, Video2Gif);
                 break;

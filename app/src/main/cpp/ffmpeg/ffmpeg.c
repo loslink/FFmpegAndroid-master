@@ -4280,7 +4280,7 @@ int run(int argc, char **argv)
 
     register_exit(ffmpeg_cleanup);
 
-    setvbuf(stderr,NULL,_IONBF,0); /* win32 runtime needs this */
+    setvbuf(stderr,NULL,_IONBF,0); /* win32 runtime needs this 缓冲区*/
 
     av_log_set_flags(AV_LOG_SKIP_REPEATED);
     parse_loglevel(argc, argv, options);
@@ -4309,14 +4309,14 @@ int run(int argc, char **argv)
     if (ret < 0)
         exit_program(1);
 
-    if (nb_output_files <= 0 && nb_input_files == 0) {
+    if (nb_output_files <= 0 && nb_input_files == 0) {//没有输入输出文件
         show_usage();
         av_log(NULL, AV_LOG_WARNING, "Use -h to get full help or, even better, run 'man %s'\n", program_name);
         exit_program(1);
     }
 
     /* file converter / grab */
-    if (nb_output_files <= 0) {
+    if (nb_output_files <= 0) {//没有输出文件
         av_log(NULL, AV_LOG_FATAL, "At least one output file must be specified\n");
         exit_program(1);
     }
