@@ -4268,10 +4268,56 @@ static int64_t getmaxrss(void)
     return 0;
 #endif
 }
+#include <android/log.h>
+
+#define TAG  "ffmpeg-av" // 这个是自定义的LOG的标识
+#define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,TAG,__VA_ARGS__) // 定义LOGD类型
+
+
+void onProgress(char *ret) {
+    int result = 0;
+    char timeStr[10] = "time=";
+    char *q = strstr(ret, timeStr);
+    if(q != NULL){//日志信息中若包含"time="字符串
+        char str[14] = {0};
+        strncpy(str, q, 13);
+        if(!strchr(str, ':')){
+            return;
+        }
+        int h =(str[5]-'0')*10+(str[6]-'0');
+        int m =(str[8]-'0')*10+(str[9]-'0');
+        int s =(str[11]-'0')*10+(str[12]-'0');
+        result = s+m*60+h*60*60;
+    }else{
+        return;
+    }
+//    LOGD("time = %d", result);//已执行时长 result
+    if(nb_input_files<=0){
+        return;
+    }
+    InputFile *f = input_files[0];
+    int64_t tduration=f->ctx->duration; //这里获取的是微秒，需要转成秒
+    float progress=result*1000000/(float)tduration;
+    LOGD("视频进度为%f", progress);
+}
 
 static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl)
 {
+    static int print_prefix = 1;
+    static int count;
+    static char prev[1024];
+    char line[1024];
+    static int is_atty;
+    av_log_format_line(ptr, level, fmt, vl, line, sizeof(line), &print_prefix);
+    strcpy(prev, line);
+    if (level <= AV_LOG_WARNING){
+//        av_log(NULL, AV_LOG_ERROR, "test\n");
+    }else{
+        onProgress(line);//传递进度信息
+    }
+
 }
+
 
 int run(int argc, char **argv)
 {
@@ -4285,9 +4331,10 @@ int run(int argc, char **argv)
     av_log_set_flags(AV_LOG_SKIP_REPEATED);
     parse_loglevel(argc, argv, options);
 
+    av_log_set_callback(log_callback_null);
     if(argc>1 && !strcmp(argv[1], "-d")){
         run_as_daemon=1;
-        av_log_set_callback(log_callback_null);
+//        av_log_set_callback(log_callback_null);
         argc--;
         argv++;
     }
