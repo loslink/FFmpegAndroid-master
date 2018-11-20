@@ -27,6 +27,8 @@
 
 #if HAVE_PTHREADS
 #include <pthread.h>
+#include <jni.h>
+
 #endif
 
 #include "cmdutils.h"
@@ -578,6 +580,6 @@ int videotoolbox_init(AVCodecContext *s);
 int qsv_init(AVCodecContext *s);
 int qsv_transcode_init(OutputStream *ost);
 
-int run(int argc, char **argv);
+int run(JNIEnv *env,int argc, char **argv,jobject jcallback);
 
 #endif /* FFMPEG_H */

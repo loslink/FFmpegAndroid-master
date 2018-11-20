@@ -4269,10 +4269,40 @@ static int64_t getmaxrss(void)
 #endif
 }
 #include <android/log.h>
+#include <jni.h>
 
 #define TAG  "ffmpeg-av" // 这个是自定义的LOG的标识
 #define LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,TAG,__VA_ARGS__) // 定义LOGD类型
 
+//调用类
+jobject jcallback_global;
+JNIEnv *env_global;
+
+void callback(float progress,void *p) {
+
+    if(p == NULL) return ;
+
+    //强转回来
+    jobject jcallback = (jobject)p;
+    //通过强转后的jcallback 获取到要回调的类
+    jclass javaClass = (*env_global)->GetObjectClass(env_global, jcallback);
+
+    if (javaClass == 0) {
+        return;
+    }
+
+    //获取要回调的方法ID
+    jmethodID javaCallbackId = (*env_global)->GetMethodID(env_global, javaClass,"onProgressChange", "(F)V");
+    if (javaCallbackId == NULL) {
+        LOGD("Unable to find method:onProgressCallBack");
+        return;
+    }
+    //执行回调
+    (*env_global)->CallVoidMethod(env_global, jcallback, javaCallbackId,progress);
+
+//    env_global = NULL;
+//    jcallback = NULL;
+}
 
 void onProgress(char *ret) {
     int result = 0;
@@ -4299,6 +4329,8 @@ void onProgress(char *ret) {
     int64_t tduration=f->ctx->duration; //这里获取的是微秒，需要转成秒
     float progress=result*1000000/(float)tduration;
     LOGD("视频进度为%f", progress);
+
+    callback(progress,jcallback_global);
 }
 
 static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl)
@@ -4318,8 +4350,7 @@ static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl)
 
 }
 
-
-int run(int argc, char **argv)
+int run(JNIEnv *env, int argc, char **argv,jobject jcallback)
 {
     int ret;
     int64_t ti;
@@ -4331,6 +4362,8 @@ int run(int argc, char **argv)
     av_log_set_flags(AV_LOG_SKIP_REPEATED);
     parse_loglevel(argc, argv, options);
 
+    jcallback_global= jcallback;
+    env_global=env;
     av_log_set_callback(log_callback_null);
     if(argc>1 && !strcmp(argv[1], "-d")){
         run_as_daemon=1;

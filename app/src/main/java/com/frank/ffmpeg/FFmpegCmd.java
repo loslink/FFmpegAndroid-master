@@ -1,5 +1,8 @@
 package com.frank.ffmpeg;
 
+import android.util.Log;
+import android.widget.Toast;
+
 public class FFmpegCmd {
 
     public interface OnHandleListener{
@@ -20,13 +23,21 @@ public class FFmpegCmd {
                     onHandleListener.onBegin();
                 }
                 //调用ffmpeg进行处理
-                int result = handle(commands);
+                int result = handle(commands, new OnSubProgressListener() {
+                    @Override
+                    public void onProgressChange(float progress) {
+                        Log.v("FFmpegCmd","progress:"+progress);
+                    }
+                });
                 if(onHandleListener != null){
                     onHandleListener.onEnd(result);
                 }
             }
         }).start();
     }
-    private native static int handle(String[] commands);
+    private native static int handle(String[] commands,OnSubProgressListener listener);
 
+    public interface OnSubProgressListener {
+        void onProgressChange(float progress);
+    }
 }

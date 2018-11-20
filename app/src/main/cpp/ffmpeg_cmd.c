@@ -2,7 +2,7 @@
 #include "ffmpeg/ffmpeg.h"
 
 JNIEXPORT jint JNICALL Java_com_frank_ffmpeg_FFmpegCmd_handle
-        (JNIEnv *env, jclass obj, jobjectArray commands){
+        (JNIEnv *env, jclass obj, jobjectArray commands,jobject jcallback){
     int argc = (*env)->GetArrayLength(env, commands);//获取字符串长度
     char **argv = (char**)malloc(argc * sizeof(char*));//申请内存空间，**argv存得内存空间首地址（单星指向内容，双星指向地址）
     int i;
@@ -14,8 +14,10 @@ JNIEXPORT jint JNICALL Java_com_frank_ffmpeg_FFmpegCmd_handle
         strcpy(argv[i], temp);//后字符串复制到前字符串
         (*env)->ReleaseStringUTFChars(env, jstr, temp);//释放字符串内存
     }
+    //生成一个全局引用，回调的时候findclass才不会为null
+    jobject callback = (*env)->NewGlobalRef(env, jcallback);
     //执行ffmpeg命令
-    result =  run(argc, argv);
+    result =  run(env,argc, argv,callback);
     //释放内存
     for (i = 0; i < argc; i++) {
         free(argv[i]);
