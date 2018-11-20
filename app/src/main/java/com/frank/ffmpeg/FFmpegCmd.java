@@ -28,6 +28,7 @@ public class FFmpegCmd {
                     public void onProgressChange(float progress) {
                         Log.v("FFmpegCmd","progress:"+progress);
                     }
+
                 });
                 if(onHandleListener != null){
                     onHandleListener.onEnd(result);
